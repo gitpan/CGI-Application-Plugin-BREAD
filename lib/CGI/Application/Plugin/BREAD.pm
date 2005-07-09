@@ -20,7 +20,7 @@ our @EXPORT_OK = qw(
     log_directive	
 );
 
-our $VERSION = '0.10';
+our $VERSION = '0.11_1';
 
 use Data::Dumper;
 
@@ -399,7 +399,7 @@ __END__
 
 =head1 NAME
 
-CGI::Application::Plugin::BREAD
+CGI::Application::Plugin::BREAD - Plugin for Dynamic Database Management Application
 
 =head2 Description
 
