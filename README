@@ -1,0 +1,46 @@
+CGI/Application/Plugin/BREAD version 0.10
+=========================================
+
+Welcome to CGI::Application::Plugin::BREAD!
+
+BREAD is yet another acronym: (B)rowse, (R)ead, (E)dit,
+(A)dd and (D)elete.
+
+We built this plugin to showcase the power of CGI::Application
+as well as provide the developer with an extremely easy-to-use
+module that will provide a database management system in no time.
+
+This release is "alpha" - please do not use this in a production
+environment until we reach version 1.0.  This release is meant
+to gather feedback and keep our momentum going.
+
+Thanks for giving us a shot!
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+    CGI::Application (version 4.0)
+    HTML::Template
+    HTML::FillInForm
+    HTML::Pager
+    Class::DBI::FormBuilder
+    Class::DBI
+    Class::DBI::Loader (optional)
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2005 Jason Purdy, All Rights Reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself. 
+

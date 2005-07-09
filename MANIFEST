@@ -1,0 +1,11 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+lib/CGI/Application/Plugin/BREAD.pm
+t/00-load.t
+t/02-pod.t
+t/03-pod_coverage.t
+t/04-basic.t
+t/07-bad-cdbi.t
+META.yml                                 Module meta-data (added by MakeMaker)

@@ -1,0 +1,17 @@
+Sat Jul  9 00:26:10 EDT 2005  jason@purdy.info
+  * 0.10_rc1
+   * Lots of changes to get ready for an alpha release
+   * Documentation Updates
+   * Testing File Updates
+
+Thu Jul  7 09:24:51 EDT 2005  jason@purdy.info
+  * 0.10_2
+    * Cleaned line endings.
+    * Added dependent modules in Makefile
+
+Thu Jul  7 00:05:50 EDT 2005  jason@purdy.info
+  * 0.10_1
+  cleaned some line endings and then changed the delete button from the browse runmode from a nested form/button to a link b/c it was confusing html::pager's form above
+
+Wed Jul  6 17:30:20 EDT 2005  jason@purdy.info
+  * Initial import.
