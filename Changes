@@ -1,3 +1,25 @@
+Sat Jul  9 20:06:08 EDT 2005  jason@purdy.info
+  * 0.12_1_rc1
+   * Recorded Mark's changes in Changes
+   * URL changes (moving to more public site)
+
+Sat Jul  9 17:09:52 EDT 2005  mark@summersault.com
+  * make it even easier for people to help out by documenting how.
+
+Sat Jul  9 16:26:13 EDT 2005  mark@summersault.com
+  * don't load Data::Dumper since it's not used
+
+Sat Jul  9 16:07:44 EDT 2005  mark@summersault.com
+  * use an explicit return for clarity
+
+Sat Jul  9 16:05:20 EDT 2005  mark@summersault.com
+  * use recommended Plugin name space convention instead of a package lexical.
+
+Sat Jul  9 16:03:44 EDT 2005  mark@summersault.com
+  * only load HTML::Pager when it is needed
+  
+  ( For the longer term I recommend a Data::Page-based solution. )
+
 Sat Jul  9 14:19:41 EDT 2005  jason@purdy.info
   * 0.11_1_rc2
     * Tweaked POD & Makefile.PL to get abstract

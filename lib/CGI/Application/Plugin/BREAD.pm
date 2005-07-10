@@ -8,7 +8,6 @@ use vars qw( @ISA @EXPORT @EXPORT_OK $VERSION );
 
 use HTML::Template;
 use HTML::FillInForm;
-use HTML::Pager;
 
 @ISA = qw( Exporter AutoLoader );
 
@@ -20,11 +19,7 @@ our @EXPORT_OK = qw(
     log_directive	
 );
 
-our $VERSION = '0.11_1';
-
-use Data::Dumper;
-
-my ( $internal_data );
+our $VERSION = '0.12_1';
 
 sub import
 {
@@ -41,8 +36,8 @@ sub _register_runmodes
     #warn "CGI::Application::Plugin::BREAD::register_runmodes() called!";
     %runmodes = ( 'start' => \&_start );
     $tables = {};
-    if ( $internal_data->{'classes'} ) {
-        foreach my $cdbi_class ( @{$internal_data->{'classes'}} ) {
+    if ( $self->{'BREAD'}->{'classes'} ) {
+        foreach my $cdbi_class ( @{$self->{'BREAD'}->{'classes'}} ) {
             my $table = $cdbi_class->table;
             $runmodes{ "browse_$table" }            = \&_browse;
             $runmodes{ "read_$table" }              = \&_read;
@@ -56,12 +51,11 @@ sub _register_runmodes
     } else {
         die "We don't have any db classes!  Did you set any up with the bread_db() method?";
     }
-    $internal_data->{'tables'} = $tables;
-    #die Dumper( \%ENV );
+    $self->{'BREAD'}->{'tables'} = $tables;
     $uri = $ENV{'SCRIPT_URI'};
     # take off any tailing parameters...
     #$uri =~ s/\?.+//;
-    $internal_data->{'uri'} = $uri;
+    $self->{'BREAD'}->{'uri'} = $uri;
     
     $self->run_modes( %runmodes );
 }
@@ -76,7 +70,7 @@ sub bread_db
     # check parameter type ... it's either an arrayref or a ::Loader ref
     $classes = [];
     if ( ref( $parameter ) eq 'ARRAY' ) {
-        $internal_data->{'cdbi_type'} = 'classes';
+        $self->{'BREAD'}->{'cdbi_type'} = 'classes';
         foreach my $cdbi_class ( @$parameter ) {
             # check to see if it's loaded already
             unless ( $cdbi_class:: ) {
@@ -92,7 +86,7 @@ sub bread_db
             push @$classes, $cdbi_class;
         }
     } elsif ( ref( $parameter ) =~ /^Class::DBI::Loader/ ) {
-        $internal_data->{'cdbi_type'} = 'loader';
+        $self->{'BREAD'}->{'cdbi_type'} = 'loader';
         foreach my $class ( $parameter->classes ) {
             push @$classes, $class;
         }
@@ -100,14 +94,14 @@ sub bread_db
         my $ref = ref( $parameter );
         die "CGI::Application::Plugin::BREAD::bread_db(): Invalid parameter\nParameter must either be an array reference of Class::DBI classes or a Class::DBI::Loader object\nYou gave me a $ref object.";
     }
-    $internal_data->{'classes'} = $classes;
+    $self->{'BREAD'}->{'classes'} = $classes;
 }
 
 sub browse_page_size
 {
-    my ( undef, $size ) = @_;
+    my ( $self, $size ) = @_;
     if ( $size =~ /^\d+$/ && $size > 0 ) {
-        $internal_data->{'page_size'} = $size;
+        $self->{'BREAD'}->{'page_size'} = $size;
     } else {
         warn "CGI::Application::Plugin::BREAD::browse_page_size(): Invalid page_size ($size) - must be a positive decimal.";
     }
@@ -134,13 +128,13 @@ sub _start
     $self = shift;
     
     $table_ar = [];
-    $table_hr = $internal_data->{'tables'};
+    $table_hr = $self->{'BREAD'}->{'tables'};
     while( my ( $table, undef ) = each %$table_hr ) {
         push @$table_ar, {
                 'table' => $table,
             };
     }
-    $uri = $internal_data->{'uri'};
+    $uri = $self->{'BREAD'}->{'uri'};
     
     $template_html = <<_EOF_;
 <html>
@@ -171,15 +165,15 @@ sub _browse
     $runmode = $self->get_current_runmode();
     ( $table ) = $runmode =~ /^browse_(.+)$/;
     
-    $class = $internal_data->{'tables'}->{$table};
-    $internal_data->{'page_size'} = 20 if ! $internal_data->{'page_size'};
+    $class = $self->{'BREAD'}->{'tables'}->{$table};
+    $self->{'BREAD'}->{'page_size'} = 20 if ! $self->{'BREAD'}->{'page_size'};
     
     @columns = $class->columns;
     $colspan = scalar( @columns );
     $objects_iterator = $class->retrieve_all;
     $headers = [];
     $subtemplate = '';
-    $uri = $internal_data->{'uri'};
+    $uri = $self->{'BREAD'}->{'uri'};
     # pull out primary column (if we have it) first...
     if ( my $primary = $class->primary_column ) {
         push @$headers, { 'header' => $primary };
@@ -238,8 +232,8 @@ _EOF_
             'table'     => $table,
             'headers'   => $headers,
             'count'     => $objects_iterator->count,
-            'pagesize'  => $internal_data->{'page_size'},
-            'num_pages' => sprintf( "%d", ($objects_iterator->count/$internal_data->{'page_size'})+1 )
+            'pagesize'  => $self->{'BREAD'}->{'page_size'},
+            'num_pages' => sprintf( "%d", ($objects_iterator->count/$self->{'BREAD'}->{'page_size'})+1 )
         );
     
     $get_data_sub = sub
@@ -262,16 +256,16 @@ _EOF_
             return $records;
         };
     
+    require HTML::Pager;
     $pager = HTML::Pager->new(
             'template'          => $template,
             'query'             => $self->query,
             'rows'              => $objects_iterator->count,
-            'page_size'         => $internal_data->{'page_size'},
+            'page_size'         => $self->{'BREAD'}->{'page_size'},
             'get_data_callback' => $get_data_sub,
             'persist_vars'      => [ 'rm' ],
         );
-    $pager->output();
-
+   return  $pager->output();
 }
 
 sub _read
@@ -289,7 +283,7 @@ sub _edit
 
     $html = _get_add_or_edit_form( $self );
 
-    $class = $internal_data->{'tables'}->{$table};
+    $class = $self->{'BREAD'}->{'tables'}->{$table};
     $obj = $class->retrieve( $self->query->param( 'id' ) );
     %data = ();
     foreach my $column ( sort $class->columns ) {
@@ -319,13 +313,13 @@ sub _delete
     $self = shift;
     $runmode = $self->get_current_runmode();
     ( $table ) = $runmode =~ /^delete_(.+)$/;
-    $class = $internal_data->{'tables'}->{$table};
+    $class = $self->{'BREAD'}->{'tables'}->{$table};
     $obj = $class->retrieve( $self->query->param( 'id' ) );
     
     $obj->delete;
     
     $self->header_type( 'redirect' );
-    $self->header_props( -url => $internal_data->{'uri'} );
+    $self->header_props( -url => $self->{'BREAD'}->{'uri'} );
 }
 
 sub _submit
@@ -335,7 +329,7 @@ sub _submit
     $self = shift;
     $runmode = $self->get_current_runmode();
     ( $mode, $table ) = $runmode =~ /^(add|edit)_(.+)_submit$/;
-    $class = $internal_data->{'tables'}->{$table};
+    $class = $self->{'BREAD'}->{'tables'}->{$table};
     
     $form = $class->as_form( params => $self->query );
     if ( $form->submitted ) {
@@ -350,7 +344,7 @@ sub _submit
     
     # redirecting user back to main page
     $self->header_type( 'redirect' );
-    $self->header_props( -url => $internal_data->{'uri'} );
+    $self->header_props( -url => $self->{'BREAD'}->{'uri'} );
 }
 
 sub _get_add_or_edit_form
@@ -367,7 +361,7 @@ sub _get_add_or_edit_form
 
     $runmode = $self->get_current_runmode();
     ( $mode, $table ) = $runmode =~ /^(add|edit)_(.+)$/;
-    $class = $internal_data->{'tables'}->{$table};
+    $class = $self->{'BREAD'}->{'tables'}->{$table};
     $class->form_builder_defaults( { method => 'post' } );
 
     $form = $class->as_form( params => $self->query )->render;
@@ -479,6 +473,18 @@ L<CGI::Application>, L<HTML::Template>, L<Template::Toolkit>, L<Petal.pm>, L<DBI
 
 L<http://www.cgi-app.org> CGI::Application Wiki
 
+=head1 DEVELOPMENT
+
+This software is managed with darcs (L<http://www.darcs.net>). You can get the repository here with darcs:
+
+L<http://www.purdy.info/darcs/cap-bread>
+
+Or browse it via the web:
+
+L<http://www.purdy.info/cgi-bin/darcs.cgi/cap-bread/?c=browse>
+
+You can discuss this module on cgi-app@lists.erlbaum.net or #cgiapp on irc.perl.org.
+
 =head1 BUGS
 
 This release is "alpha" - please do not use this in a production
@@ -492,6 +498,7 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=CGI-Application-Plugin-BREAD>
 =head1 AUTHORS
 
 Jason Purdy, <jason@purdy.info>
+Mark Stosberg <mark@summersault.com>
 
 =head1 LICENSE
 
