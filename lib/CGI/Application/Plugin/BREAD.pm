@@ -19,7 +19,7 @@ our @EXPORT_OK = qw(
     log_directive	
 );
 
-our $VERSION = '0.12_1';
+our $VERSION = '0.12_2';
 
 sub import
 {
@@ -408,7 +408,8 @@ In your CGI::Application module:
   package MyBREADApp;
 
   use base 'CGI::Application';
-  use CGI::Application::Plugin::BREAD;
+  use CGI::Application::Plugin::BREAD qw( bread_db );
+  use Class::DBI::Loader;
 
   sub setup
   {

@@ -1,3 +1,16 @@
+Sun Jul 10 14:19:31 EDT 2005  jason@purdy.info
+  * 0.12_2
+   * POD update, fixing sample cgiapp so it will just run (RHESA)
+   * Test file fix: better failure if Test::POD::Coverage isn't installed (RHESA)
+
+Sun Jul 10 10:09:07 EDT 2005  jason@purdy.info
+  * 0.12_2
+   * Cleaned line endings in 03-pod_coverage.t
+   * Fixed plans skip line (RHESA)
+
+Sat Jul  9 20:07:24 EDT 2005  jason@purdy.info
+  * 0.12_1_rc2
+
 Sat Jul  9 20:06:08 EDT 2005  jason@purdy.info
   * 0.12_1_rc1
    * Recorded Mark's changes in Changes
